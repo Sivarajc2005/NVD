@@ -1,0 +1,22 @@
+package com.example.Model;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.relational.core.mapping.Table;
+
+@Entity
+@Table(name = "vulnerabilities")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Vulnerabilities {
+
+    @Id
+    private String id;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "cve_id")
+    private Cve cve;
+}
