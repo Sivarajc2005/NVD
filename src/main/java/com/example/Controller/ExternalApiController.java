@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import com.example.Model.NvdResponse;
 import com.example.Services.ExternalApiService;
 import com.example.Services.StoreData;
 
@@ -29,7 +28,7 @@ public class ExternalApiController {
     }
 
     @GetMapping("/fetch")
-    public int fetchData() {
+    public String fetchData() {
         String url = "https://services.nvd.nist.gov/rest/json/cves/2.0";
         // int saved = service.fetchAndStore(url);
         // NvdResponse data  = restTemplate.getForObject(url, NvdResponse.class);

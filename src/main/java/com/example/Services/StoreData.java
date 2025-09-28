@@ -1,7 +1,5 @@
 package com.example.Services;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -15,6 +13,7 @@ import com.example.Repository.CveRepository;
 import com.example.Repository.DescriptionsRepository;
 import com.example.Repository.MetricsRepository;
 import com.example.Repository.NodesRepository;
+import com.example.Repository.NvdResponseRepository;
 import com.example.Repository.VulnerabilitiesRepository;
 
 @Service
@@ -47,35 +46,22 @@ public class StoreData {
     @Autowired
     public RestTemplate restTemplate;
 
-    public int saveVulnerability(String url) {
-        NvdResponse data = restTemplate.getForObject(url , NvdResponse.class);
-        
-        if(data == null) {
-            return 0;
-        }
+    @Autowired
+    public NvdResponseRepository nvdResponseRepository;
 
-        List<Vulnerabilities> vulnerabilitieList = data.getVulnerabilities();
-        int c = 0;
-        if(vulnerabilitieList != null ){
-            for(Vulnerabilities vulnerability : vulnerabilitieList){
-                // Check if vulnerability has a valid ID and CVE data
-                if(vulnerability.getId() != null && vulnerability.getCve() != null && vulnerability.getCve().getId() != null) {
-                    // Use CVE ID as the primary identifier for checking existence
-                    String cveId = vulnerability.getCve().getId();
-                    
-                    // Check if this CVE already exists in the database
-                    if(!cveRepository.existsById(cveId)) {
-                        // Save the vulnerability only if it doesn't exist
-                        vulnerabilitiesRepository.save(vulnerability);
-                        c++;
-                    }
-                }
+    public String saveVulnerability(String url) {
+        NvdResponse data = restTemplate.getForObject(url, NvdResponse.class);
+
+        // Attach parent-child relationships before saving
+        if (data.getVulnerabilities() != null) {
+            for (Vulnerabilities v : data.getVulnerabilities()) {
+                v.setNvdResponse(data); // set parent
             }
         }
 
-        return c;
+        // ✅ Save root entity
+        NvdResponse saved = nvdResponseRepository.save(data);
 
+        return "Saved " + saved.getVulnerabilities().size() + " vulnerabilities";
     }
-
-    
 }
